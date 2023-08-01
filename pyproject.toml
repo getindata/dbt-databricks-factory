@@ -58,6 +58,10 @@ exclude = ["tests"]
 ignore_missing_imports = true
 strict = true
 
+[[tool.mypy.overrides]]
+module = "src.dbt_databricks_factory.cli"
+disallow_untyped_decorators = false
+
 [tool.coverage.run]
 source = ["src"]
 omit = ["tests/*"]

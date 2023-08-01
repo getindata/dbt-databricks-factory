@@ -1,0 +1,20 @@
+{
+  "runtime_engine": "PHOTON",
+  "spark_version": "13.2.x-scala2.12",
+  "node_type_id": "i3.xlarge",
+  "autoscale": {
+    "min_workers": 2,
+    "max_workers": 8
+  },
+  "init_scripts": [
+    {"workspace": {"destination": "/Shared/init-scripts/init_config.sh"}}
+  ],
+  "spark_env_vars": {
+    "GCP_KEY": "{{secrets/dataops-labs/gcp-pipeline-example-key}}"
+  },
+  "cluster_log_conf": {
+    "dbfs": {
+      "destination": "dbfs:/cluster-logs"
+    }
+  }
+}

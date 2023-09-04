@@ -44,34 +44,38 @@ class DatabricksGraphBuilder:
 
     def __init__(
         self,
-        path: str,
         dbt_project_config: DbtProjectConfig,
         databricks_job_config: DatabricksJobConfig,
-        graph_config: GraphConfiguration | None = None,
         schedule_config: ScheduleConfig | None = None,
     ):
         """Create a new instance of DatabricksGraphBuilder.
 
         Args:
-            path (str): Path to dbt manifest.json file.
             dbt_project_config (DbtProjectConfig): Dbt project config.
             databricks_job_config (DatabricksJobConfig): Databricks job config.
-            graph_config (GraphConfiguration, optional): Graph configuration. Defaults to None.
             schedule_config (ScheduleConfig, optional): Schedule configuration. Defaults to None.
         """
-        self._tasks_graph = create_tasks_graph(load_dbt_manifest(path), graph_config)
         self._dbt_project_config = dbt_project_config
         self._databricks_job_config = databricks_job_config
         self._schedule_config = schedule_config
 
-    def build(self) -> dict[str, Any]:
+    def build(
+        self,
+        path: str,
+        graph_config: GraphConfiguration | None = None,
+    ) -> dict[str, Any]:
         """Build Databricks job config.
+
+        Args:
+            path (str): Path to dbt project.
+            graph_config (GraphConfiguration, optional): Graph configuration. Defaults to None.
 
         Returns:
             dict[str, Any]: Databricks job config.
         """
+        tasks_graph = create_tasks_graph(load_dbt_manifest(path), graph_config)
         tasks: list[dict[str, Any]] = []
-        for node in self._tasks_graph.get_graph_nodes():
+        for node in tasks_graph.get_graph_nodes():
             tasks.extend(self._build_task(node))
         return {
             "name": self._databricks_job_config.job_name,

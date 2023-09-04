@@ -87,7 +87,6 @@ def create_job(
         default_task_cluster_config = None
 
     builder = DatabricksGraphBuilder(
-        manifest_file,
         DbtProjectConfig(
             project_dir, profiles_dir, git_url, GitProvider(git_provider), git_branch, git_commit, git_tag
         ),
@@ -105,7 +104,7 @@ def create_job(
         ),
         schedule_config=ScheduleConfig(cron_schedule, "UTC") if cron_schedule is not None else None,
     )
-    click.echo(json.dumps(builder.build(), indent=2 if pretty else None))
+    click.echo(json.dumps(builder.build(manifest_file), indent=2 if pretty else None))
 
 
 if __name__ == "__main__":

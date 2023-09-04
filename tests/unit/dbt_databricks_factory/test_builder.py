@@ -11,7 +11,6 @@ from dbt_databricks_factory.config import (
 
 def test_builder():
     graph_builder = DatabricksGraphBuilder(
-        "tests/unit/dbt_databricks_factory/test_data/manifest.json",
         DbtProjectConfig(
             "/project/dir",
             "/profiles/dir",
@@ -35,7 +34,7 @@ def test_builder():
             "UTC",
         ),
     )
-    assert graph_builder.build() == {
+    assert graph_builder.build("tests/unit/dbt_databricks_factory/test_data/manifest.json") == {
         "name": "job-name",
         "format": "MULTI_TASK",
         "git_source": {"git_branch": "my-branch", "git_provider": "gitHub", "git_url": "https://my-git.url.com"},

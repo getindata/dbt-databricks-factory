@@ -128,20 +128,15 @@ class DatabricksGraphBuilder:
 
     def _depends_on(self, node: tuple[str, dict[str, Any]], task_type: TaskType) -> dict[str, Any]:
         if task_type == TaskType.RUN:
-            if not node[1]["depends_on"]:
+            predecessors: list[str] = list(self._tasks_graph.graph.predecessors(node[0]))  # type: ignore
+            if not predecessors:
                 return {}
             return {
-                "depends_on": [
-                    {"task_key": f"{normalize_node_name(dependant)}-test"}
-                    for dependant in self._filter_dependants(node[1]["depends_on"])
-                ]
+                "depends_on": [{"task_key": f"{normalize_node_name(dependant)}-test"} for dependant in predecessors]
             }
         if task_type == TaskType.TEST:
             return {"depends_on": [{"task_key": f"{normalize_node_name(node[0])}-run"}]}
         raise NotImplementedError(f"Task type {task_type} is not supported")
-
-    def _filter_dependants(self, dependants: list[str]) -> list[str]:
-        return [dependant for dependant in dependants if not dependant.startswith("source")]
 
     def _cluster_spec(self, node: str) -> dict[str, Any]:
         if (

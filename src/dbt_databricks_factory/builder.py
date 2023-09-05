@@ -8,6 +8,7 @@ from dbt_graph_builder.builder import (
     GraphConfiguration,
     create_tasks_graph,
     load_dbt_manifest,
+    DbtManifestGraph,
 )
 from dbt_graph_builder.node_type import NodeType
 
@@ -58,6 +59,7 @@ class DatabricksGraphBuilder:
         self._dbt_project_config = dbt_project_config
         self._databricks_job_config = databricks_job_config
         self._schedule_config = schedule_config
+        self._tasks_graph: DbtManifestGraph | None = None
 
     def build(
         self,
@@ -73,10 +75,11 @@ class DatabricksGraphBuilder:
         Returns:
             dict[str, Any]: Databricks job config.
         """
-        tasks_graph = create_tasks_graph(load_dbt_manifest(path), graph_config)
+        self._tasks_graph = create_tasks_graph(load_dbt_manifest(path), graph_config)
         tasks: list[dict[str, Any]] = []
-        for node in tasks_graph.get_graph_nodes():
+        for node in self._tasks_graph.get_graph_nodes():
             tasks.extend(self._build_task(node))
+        self._tasks_graph = None
         return {
             "name": self._databricks_job_config.job_name,
             "tasks": tasks,
@@ -129,12 +132,15 @@ class DatabricksGraphBuilder:
                 return {}
             return {
                 "depends_on": [
-                    {"task_key": f"{normalize_node_name(dependant)}-test"} for dependant in node[1]["depends_on"]
+                    {"task_key": f"{normalize_node_name(dependant)}-test"} for dependant in self._filter_dependants(node[1]["depends_on"])
                 ]
             }
         if task_type == TaskType.TEST:
             return {"depends_on": [{"task_key": f"{normalize_node_name(node[0])}-run"}]}
         raise NotImplementedError(f"Task type {task_type} is not supported")
+
+    def _filter_dependants(self, dependants: list[str]) -> list[str]:
+        return [dependant for dependant in dependants if not dependant.startswith("source")]
 
     def _cluster_spec(self, node: str) -> dict[str, Any]:
         if (

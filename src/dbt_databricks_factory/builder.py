@@ -5,10 +5,10 @@ from enum import Enum
 from typing import Any
 
 from dbt_graph_builder.builder import (
+    DbtManifestGraph,
     GraphConfiguration,
     create_tasks_graph,
     load_dbt_manifest,
-    DbtManifestGraph,
 )
 from dbt_graph_builder.node_type import NodeType
 
@@ -132,7 +132,8 @@ class DatabricksGraphBuilder:
                 return {}
             return {
                 "depends_on": [
-                    {"task_key": f"{normalize_node_name(dependant)}-test"} for dependant in self._filter_dependants(node[1]["depends_on"])
+                    {"task_key": f"{normalize_node_name(dependant)}-test"}
+                    for dependant in self._filter_dependants(node[1]["depends_on"])
                 ]
             }
         if task_type == TaskType.TEST:

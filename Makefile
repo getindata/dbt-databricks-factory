@@ -1,5 +1,4 @@
-.PHONY: check-hooks install-dev
-
+.PHONY: install-dev
 install-dev:
 	@echo "Installing dev packages..."
 	@pip install pipx
@@ -8,6 +7,7 @@ install-dev:
 	@echo "Installing pre-commit hooks..."
 	@pre-commit install
 
+.PHONY: check-hooks
 check-hooks:
 	@echo "Checking pre-commit hooks..."
 	@pre-commit run --all-files
